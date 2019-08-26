@@ -98,6 +98,35 @@ PowerControls.on('aux', () => {
 })
 ```
 
+API Documentation
+-----------------
+
+### `new Device(name, port, baudRate?, reconnectInterval?, autoConnect?)`
+
+Constructor
+
+  * `name`: Human-readable identifier for logging/errors
+  * `port`: Qualified path on MacOS/Linux (`/dev/some/device/path`) or COM port on Windows (`COM3`)
+  * `baudRate`: Baud rate used for communication (default: `115200`)
+  * `reconnectInterval`: Seconds until reconnect attempt after disconnect or error (default: `3`)
+  * `autoConnect`: Automatically connect on instantiation (default `true`). If you set this to `false`, you'll need to manually call `connect()` at a later time.
+
+### `Device.connect()`
+
+Connect to Serial device described in constructors args.
+
+### `Device.receive(data)`
+
+Override in child classes. Automatically called when a new line of serial data is received for this device.
+
+  * `data`: Incoming string
+
+### `Device.send(data)`
+
+Send serial data to device.
+
+  * `data`: Outgoing string
+
 Development & Tests
 -------------------
 

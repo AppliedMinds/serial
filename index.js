@@ -2,14 +2,14 @@ const EventEmitter = require('events')
 const SerialPort = require('serialport')
 
 class Device extends EventEmitter {
-    constructor({ name, port, baudRate=115200, reconnectInterval=3 }) {
+    constructor({ name, port, baudRate=115200, reconnectInterval=3, autoConnect=true }) {
         super()
         this.name = name
         this.port = port
         this.baudRate = baudRate
         // Seconds to reconnect
         this.reconnectInterval = reconnectInterval
-        this.connect()
+        if (autoConnect) this.connect()
     }
     connect() {
         this.serial = new SerialPort(this.port, { baudRate: this.baudRate })

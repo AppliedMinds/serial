@@ -9,9 +9,10 @@ const { expect, spy } = require('chai')
 const proxyquire = require('proxyquire')
 
 class MockSerialPort extends EventEmitter {
-    constructor() {
+    constructor(port) {
         super()
-        setTimeout(this.emit.bind(this, 'open'), 20)
+        if (port) setTimeout(this.emit.bind(this, 'open'), 20)
+        else throw Error('No port to connect to!')
     }
     pipe() {
         return this
@@ -29,6 +30,10 @@ describe('Wrapper', () => {
         await delay(30)
         expect(initFunc).to.have.been.called
         spy.restore(Device.prototype, 'init')
+    })
+    it('should allow manual connection if desired', async() => {
+        const start = function() { new Device({ name: 'test', autoConnect: false }) }
+        expect(start).to.not.throw(Error)
     })
     it('should reconnect on close', async() => {
         let initFunc = spy.on(Device.prototype, 'init')

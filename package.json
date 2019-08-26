@@ -14,7 +14,7 @@
   },
   "repository": {
     "type": "git",
-    "url": "https://am-vm-gitlab00.amthinking.net/software-engineering-tools/ami-serial"
+    "url": "https://am-gitlab.amthinking.net/software-engineering-tools/ami-serial"
   },
   "devDependencies": {
     "chai": "^4.2.0",
