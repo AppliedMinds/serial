@@ -70,4 +70,12 @@ describe('Wrapper', () => {
         device.send('outbound!')
         expect(writeFunc).to.have.been.called.with('outbound!')
     })
+    it('should emit a connect event when connected', async() => {
+        let device = new Device({ name: 'test', port: '/dev/null' })
+        function testFunc() {}
+        let runMe = spy.on(testFunc)
+        device.on('connect', runMe)
+        await delay(60)
+        expect(runMe).to.have.been.called.once
+    })
 })

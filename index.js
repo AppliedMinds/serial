@@ -20,6 +20,7 @@ class Device extends EventEmitter {
     }
     init() {
         console.info(`Connected to device ${this.name} at ${this.port}.`)
+        this.emit('connect')
     }
     error(error) {
         console.error(`Problem with ${this.name}: ${error}. Attemping reconnect in ${this.reconnectInterval} seconds...`)
