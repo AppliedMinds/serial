@@ -19,7 +19,7 @@ class MockSerialPort extends EventEmitter {
     }
     write() {}
 }
-const { Device } = proxyquire('.', { '@serialport/stream': MockSerialPort })
+const { Device } = proxyquire('.', { 'serialport': MockSerialPort })
 
 const delay = (ms) => new Promise((res) => setTimeout(res, ms))
 

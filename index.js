@@ -1,5 +1,5 @@
 const EventEmitter = require('events')
-const SerialPort = require('@serialport/stream')
+const SerialPort = require('serialport')
 const ReadLine = require('@serialport/parser-readline')
 
 class Device extends EventEmitter {
