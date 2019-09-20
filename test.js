@@ -19,7 +19,7 @@ class MockSerialPort extends EventEmitter {
     }
     write() {}
 }
-const { Device } = proxyquire('.', { 'serialport': MockSerialPort })
+const { Device } = proxyquire('.', { '@serialport/stream': MockSerialPort })
 
 const delay = (ms) => new Promise((res) => setTimeout(res, ms))
 
@@ -69,6 +69,7 @@ describe('Wrapper', () => {
         let writeFunc = spy.on(MockSerialPort.prototype, 'write')
         device.send('outbound!')
         expect(writeFunc).to.have.been.called.with('outbound!')
+        spy.restore(MockSerialPort.prototype, 'write')
     })
     it('should emit a connect event when connected', async() => {
         let device = new Device({ name: 'test', port: '/dev/null' })
@@ -77,5 +78,16 @@ describe('Wrapper', () => {
         device.on('connect', runMe)
         await delay(60)
         expect(runMe).to.have.been.called.once
+    })
+})
+
+describe('Parsing', () => {
+    it('should allow passing of custom parsers', async() => {
+        let pipeFunc = spy.on(MockSerialPort.prototype, 'pipe')
+        const FakeParser = {}
+        let device = new Device({ name: 'test', port: '/dev/null', parser: FakeParser })
+        device.serial.emit('data', 'a message\nsecond ')
+        expect(pipeFunc).to.have.been.called.with(FakeParser)
+        spy.restore(MockSerialPort.prototype, 'pipe')
     })
 })
