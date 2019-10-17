@@ -101,7 +101,7 @@ PowerControls.on('aux', () => {
 API Documentation
 -----------------
 
-### `new Device(name, port, baudRate?, reconnectInterval?, autoConnect?)`
+### `new Device({ name, port, baudRate?, reconnectInterval?, autoConnect?, parser? })`
 
 Constructor
 
@@ -110,6 +110,7 @@ Constructor
   * `baudRate`: Baud rate used for communication (default: `115200`)
   * `reconnectInterval`: Seconds until reconnect attempt after disconnect or error (default: `3`)
   * `autoConnect`: Automatically connect on instantiation (default `true`). If you set this to `false`, you'll need to manually call `connect()` at a later time.
+  * `parser`: Which parser to use for incoming data (defaults to [`@serialport/parser-readline`, a parser that splits on newlines](https://serialport.io/docs/api-parser-readline))
 
 ### `Device.connect()`
 
@@ -117,7 +118,7 @@ Connect to Serial device described in constructors args.
 
 ### `Device.receive(data)`
 
-Override in child classes. Automatically called when a new line of serial data is received for this device.
+Override in child classes. Automatically called when serial data is received for this device. If no `parser` is specified, this will be called once per line.
 
   * `data`: Incoming string
 
