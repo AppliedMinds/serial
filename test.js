@@ -60,6 +60,7 @@ describe('Wrapper', () => {
     it('should receive data', async() => {
         let receiveFunc = spy.on(Device.prototype, 'receive')
         let device = new Device({ name: 'test', port: '/dev/null' })
+        await delay(30)
         device.serial.emit('data', 'a message')
         expect(receiveFunc).to.have.been.called.with('a message')
         spy.restore(Device.prototype, 'receive')
@@ -86,6 +87,7 @@ describe('Parsing', () => {
         let pipeFunc = spy.on(MockSerialPort.prototype, 'pipe')
         const FakeParser = {}
         let device = new Device({ name: 'test', port: '/dev/null', parser: FakeParser })
+        await delay(30)
         device.serial.emit('data', 'a message\nsecond ')
         expect(pipeFunc).to.have.been.called.with(FakeParser)
         spy.restore(MockSerialPort.prototype, 'pipe')
