@@ -27,12 +27,14 @@ class Device extends EventEmitter {
     }
     error(error) {
         console.error(`Problem with ${this.name}: ${error}. Attemping reconnect in ${this.reconnectInterval} seconds...`)
-        setTimeout(this.connect.bind(this), this.reconnectInterval * 1000)
+        clearTimeout(this._reconnectTimer)
+        this._reconnectTimer = setTimeout(this.connect.bind(this), this.reconnectInterval * 1000)
     }
     close() {
         console.warn(`${this.name} at ${this.port} disconnected. Attemping reconnect in ${this.reconnectInterval} seconds...`)
         this._dataStream.removeAllListeners()
-        setTimeout(this.connect.bind(this), this.reconnectInterval * 1000)
+        clearTimeout(this._reconnectTimer)
+        this._reconnectTimer = setTimeout(this.connect.bind(this), this.reconnectInterval * 1000)
     }
     receive(data) {
         // Overwrite this function in child class
