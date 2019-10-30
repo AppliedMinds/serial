@@ -24,7 +24,7 @@ Installation
 Ensure the local AMI registry is being used:
 
 ```shell
-npm set registry http://npm:4873
+npm set -g @ami:registry http://npm:4873
 ```
 
 Then simply install:
