@@ -1,95 +1,118 @@
-const EventEmitter = require('events')
-const { describe, it } = require('mocha')
-const chai = require('chai')
-const spies = require('chai-spies')
-const asPromised = require('chai-as-promised')
-chai.use(spies)
-chai.use(asPromised)
-const { expect, spy } = require('chai')
-const proxyquire = require('proxyquire')
+const SerialPort = require('serialport')
+const TestSerialPort = require('serialport/test')
+const MockBinding = TestSerialPort.Binding
+jest.mock('serialport')
+SerialPort.mockImplementation(TestSerialPort)
 
-class MockSerialPort extends EventEmitter {
-    constructor(port) {
-        super()
-        if (port) setTimeout(this.emit.bind(this, 'open'), 20)
-        else throw Error('No port to connect to!')
-    }
-    pipe() {
-        return this
-    }
-    write() {}
-}
-const { Device } = proxyquire('.', { 'serialport': MockSerialPort })
+const { Device } = require('.')
 
+const portOne = '/dev/ttyS0fake'
+MockBinding.createPort(portOne, { echo: false, record: true })
 const delay = (ms) => new Promise((res) => setTimeout(res, ms))
 
-describe('Wrapper', () => {
-    it('should connect on instantiation', async() => {
-        let initFunc = spy.on(Device.prototype, 'init')
-        new Device({ name: 'test', port: '/dev/null' })
+
+describe('Connection Handling', () => {
+    afterEach(() => {
+        jest.clearAllMocks()
+    })
+    it('should automatically connect on instantiation', async() => {
+        let connectFunc = jest.spyOn(Device.prototype, 'connect')
+        const device = new Device({ name: 'fakeDevice', port: '/dev/ttyS0fake' })
         await delay(30)
-        expect(initFunc).to.have.been.called
-        spy.restore(Device.prototype, 'init')
+        expect(connectFunc).toHaveBeenCalled()
+        device.close()
     })
-    it('should allow manual connection if desired', async() => {
-        const start = function() { new Device({ name: 'test', autoConnect: false }) }
-        expect(start).to.not.throw(Error)
+    it('should allow manual connection if desired', () => {
+        let device
+        const start = () => { device = new Device({ name: 'fakeDevice', autoConnect: false }) }
+        expect(start).not.toThrow(Error)
+        device.close()
     })
-    it('should reconnect on close', async() => {
-        let initFunc = spy.on(Device.prototype, 'init')
-        let device = new Device({ name: 'test', port: '/dev/null' })
+    it('should reconnect on abnormal close', async() => {
+        let device = new Device({ name: 'fakeDevice', port: '/dev/ttyS0fake', autoConnect: false })
+        let initFunc = jest.spyOn(device, 'init')
         // 30 ms reconnect
-        device.reconnectInterval = .003
-        await delay(30)
-        device.serial.emit('close')
-        await delay(60)
-        expect(initFunc).to.have.been.called.twice
-        spy.restore(Device.prototype, 'init')
+        device.reconnectInterval = .03
+        await device.connect()
+        // Simulate disconnect
+        device.serial._disconnected({})
+        await delay(40)
+        expect(initFunc).toHaveBeenCalledTimes(2)
+        device.close()
     })
-    it('should reconnect on error', async() => {
-        let initFunc = spy.on(Device.prototype, 'init')
-        let device = new Device({ name: 'test', port: '/dev/null' })
+    it('should reconnect if connection failed', async() => {
+        //jest.resetAllMocks() 
+        let connectFunc = jest.spyOn(Device.prototype, 'connect')
+        let device = new Device({ name: 'fakeDevice', port: '/dev/ttyNonExistent' })
         // 30 ms reconnect
-        device.reconnectInterval = .003
-        await delay(30)
-        device.serial.emit('error', 'broken!')
+        device.reconnectInterval = .03
         await delay(60)
-        expect(initFunc).to.have.been.called.twice
-        spy.restore(Device.prototype, 'init')
-    })
-    it('should receive data', async() => {
-        let receiveFunc = spy.on(Device.prototype, 'receive')
-        let device = new Device({ name: 'test', port: '/dev/null' })
-        await delay(30)
-        device.serial.emit('data', 'a message')
-        expect(receiveFunc).to.have.been.called.with('a message')
-        spy.restore(Device.prototype, 'receive')
-    })
-    it('should send data', async() => {
-        let device = new Device({ name: 'test', port: '/dev/null' })
-        let writeFunc = spy.on(MockSerialPort.prototype, 'write')
-        device.send('outbound!')
-        expect(writeFunc).to.have.been.called.with('outbound!')
-        spy.restore(MockSerialPort.prototype, 'write')
+        expect(connectFunc).toHaveBeenCalledTimes(2)
+        device.close()
     })
     it('should emit a connect event when connected', async() => {
-        let device = new Device({ name: 'test', port: '/dev/null' })
-        function testFunc() {}
-        let runMe = spy.on(testFunc)
+        let device = new Device({ name: 'fakeDevice', port: '/dev/ttyS0fake' })
+        const someFunc = () => {}
+        let runMe = jest.fn()
         device.on('connect', runMe)
-        await delay(60)
-        expect(runMe).to.have.been.called.once
+        await delay(10)
+        expect(runMe).toHaveBeenCalled()
+        device.close()
+    })
+})
+
+describe('Input/Output', () => {
+    let device
+    beforeEach(() => {
+        device = new Device({ name: 'fakeDevice', port: '/dev/ttyS0fake', autoConnect: false })
+    })
+    afterEach(() => {
+        device.close()
+    })
+    it('should receive data', async() => {
+        let receiveFunc = jest.spyOn(device, 'receive')
+        await device.connect()
+        device.serial.binding.emitData(Buffer.from('a message\nsecond'))
+        await delay(30)
+        expect(receiveFunc).toHaveBeenCalledWith('a message')
+    })
+    it('should not receive data twice after a reconnection', async() => {
+        let receiveFunc = jest.spyOn(device, 'receive')
+        await device.connect()
+        await device.close()
+        await device.connect()
+        device.serial.binding.emitData(Buffer.from('another\n'))
+        await delay(30)
+        expect(receiveFunc).toHaveBeenCalledTimes(1)
+    })
+    it('should send data', async() => {
+        await device.connect()
+        let writeFunc = jest.spyOn(device.serial, 'write')
+        device.send('outbound!')
+        await delay(5)
+        expect(writeFunc).toHaveBeenCalledWith('outbound!', expect.any(Function))
+    })
+    it('should inform user if data could not be sent', async() => {
+        let error = jest.spyOn(console, 'error')
+        await device.connect()
+        let writeFunc = jest.spyOn(device.serial, 'write')
+        device.send('this send should fail')
+        device.close()
+        await delay(5)
+        expect(error).toHaveBeenCalledWith(expect.stringMatching(/Error sending/))
     })
 })
 
 describe('Parsing', () => {
     it('should allow passing of custom parsers', async() => {
-        let pipeFunc = spy.on(MockSerialPort.prototype, 'pipe')
-        const FakeParser = {}
-        let device = new Device({ name: 'test', port: '/dev/null', parser: FakeParser })
-        await delay(30)
-        device.serial.emit('data', 'a message\nsecond ')
-        expect(pipeFunc).to.have.been.called.with(FakeParser)
-        spy.restore(MockSerialPort.prototype, 'pipe')
+        const FakeParser = {
+            emit: () => {},
+            on: () => {},
+            once: () => {}
+        }
+        let device = new Device({ name: 'fakeDevice', port: '/dev/ttyS0fake', parser: FakeParser, autoConnect: false })
+        let pipeFunc = jest.spyOn(TestSerialPort.prototype, 'pipe')
+        await device.connect()
+        expect(pipeFunc).toHaveBeenCalledWith(FakeParser)
     })
 })

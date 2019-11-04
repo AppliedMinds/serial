@@ -14,10 +14,15 @@ class Device extends EventEmitter {
         if (autoConnect) this.connect()
     }
     connect() {
-        this.serial = new SerialPort(this.port, { baudRate: this.baudRate })
-        this.serial.on('close', this.close.bind(this))
-        this.serial.on('error', this.error.bind(this))
-        this.serial.on('open', this.init.bind(this))
+        return new Promise((res, rej) => {
+            this.serial = new SerialPort(this.port, { baudRate: this.baudRate })
+            this.serial.on('close', this.closed.bind(this))
+            this.serial.on('error', this.error.bind(this))
+            this.serial.on('open', () => {
+                res()
+                this.init()
+            })
+        })
     }
     init() {
         this._dataStream = this.serial.pipe(this.parser)
@@ -31,16 +36,23 @@ class Device extends EventEmitter {
         this._reconnectTimer = setTimeout(this.connect.bind(this), this.reconnectInterval * 1000)
     }
     close() {
-        console.warn(`${this.name} at ${this.port} disconnected. Attemping reconnect in ${this.reconnectInterval} seconds...`)
-        this._dataStream.removeAllListeners()
         clearTimeout(this._reconnectTimer)
-        this._reconnectTimer = setTimeout(this.connect.bind(this), this.reconnectInterval * 1000)
+        if (this.serial && this.serial.isOpen) return new Promise(res => this.serial.close(res))
+        return Promise.resolve()
+    }
+    closed(error) {
+        clearTimeout(this._reconnectTimer)
+        this._dataStream.removeAllListeners()
+        if (error && error.disconnected) {
+            console.warn(`${this.name} at ${this.port} disconnected. Attemping reconnect in ${this.reconnectInterval} seconds...`)
+            this._reconnectTimer = setTimeout(this.connect.bind(this), this.reconnectInterval * 1000)
+        }
     }
     receive(data) {
         // Overwrite this function in child class
     }
     send(data) {
-        this.serial.write(data, err => {
+        return this.serial.write(data, err => {
             if (err) console.error(`Error sending data '${data}': ${err}`)
         })
     }

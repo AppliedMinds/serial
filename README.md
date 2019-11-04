@@ -112,9 +112,9 @@ Constructor
   * `autoConnect`: Automatically connect on instantiation (default `true`). If you set this to `false`, you'll need to manually call `connect()` at a later time.
   * `parser`: Which parser to use for incoming data (defaults to [`@serialport/parser-readline`, a parser that splits on newlines](https://serialport.io/docs/api-parser-readline))
 
-### `Device.connect()`
+### `Device.connect()` : `<Promise>`
 
-Connect to Serial device described in constructors args.
+Connect to Serial device described in constructors args. The returned promise will resolve once connected.
 
 ### `Device.receive(data)`
 
@@ -122,11 +122,15 @@ Override in child classes. Automatically called when serial data is received for
 
   * `data`: Incoming string
 
-### `Device.send(data)`
+### `Device.send(data)` : `Boolean`
 
-Send serial data to device.
+Send serial data to device. Returns `false` if the send buffer is full, otherwise `true`.
 
   * `data`: Outgoing string
+
+### `Device.close()` : `<Promise>`
+
+Close connection to device. The returned promise will resolve on completion.
 
 Development & Tests
 -------------------
