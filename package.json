@@ -16,18 +16,18 @@
     ]
   },
   "dependencies": {
-    "serialport": "^7.1.5"
+    "serialport": "^8.0.5"
   },
   "repository": {
     "type": "git",
     "url": "https://am-gitlab.amthinking.net/software-engineering-tools/js/ami-serial"
   },
   "devDependencies": {
-    "@babel/core": "^7.2.2",
-    "@babel/plugin-proposal-throw-expressions": "^7.2.0",
-    "@babel/preset-env": "^7.3.1",
-    "babel-jest": "^24.0.0",
-    "jest": "^24.0.0"
+    "@babel/core": "^7.7.5",
+    "@babel/plugin-proposal-throw-expressions": "^7.7.4",
+    "@babel/preset-env": "^7.7.6",
+    "babel-jest": "^24.9.0",
+    "jest": "^24.9.0"
   },
   "author": "Ivo Janssen <ijanssen@appliedminds.com>",
   "license": "UNLICENSED"
