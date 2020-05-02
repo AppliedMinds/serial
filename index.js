@@ -26,7 +26,7 @@ class Device extends EventEmitter {
     }
     init() {
         this._dataStream = this.serial.pipe(this.parser)
-        this._dataStream.on('data', this.receive.bind(this))
+        this._dataStream.on('data', this.emit.bind(this, 'data'))
         console.info(`Connected to device ${this.name} at ${this.port}.`)
         this.emit('connect')
     }
@@ -48,12 +48,14 @@ class Device extends EventEmitter {
             this._reconnectTimer = setTimeout(this.connect.bind(this), this.reconnectInterval * 1000)
         }
     }
-    receive(data) {
-        // Overwrite this function in child class
-    }
-    send(data) {
-        return this.serial.write(data, err => {
-            if (err) console.error(`Error sending data '${data}': ${err}`)
+    async send(data) {
+        return new Promise((res, rej) => {
+            this.serial.write(data, err => {
+                if (err) {
+                    return rej(`Error sending data '${data}': ${err}`)
+                }
+                res(true)
+            })
         })
     }
 }

@@ -1,7 +1,7 @@
-AMI Serial Wrapper
-==================
+AMI Serial Device
+=================
 
-Base class for creating serial-based hardware integrations with Node.js.
+Easily integrate with serial-based hardware with Node.js.
 
 Features:
 
@@ -36,30 +36,32 @@ npm install @ami/serial
 Usage / Examples
 ----------------
 
-`Device` should be used as a base class for any piece of hardware that uses serial to communicate.
+Create a new `Device` for any piece of hardware that uses serial to communicate.
 
 For example, imagine a motor board that uses `F`, `B` or `S` to send forward, back or stop commands, respectively:
 
 ```javascript
 const SerialDevice = require('@ami/serial').Device
 
-class Motor extends SerialDevice {
+class Motor {
     constructor(port) {
-        super({ name: 'motor', port, baudRate: 57600 })
+        this.device = new SerialDevice({ name: 'motor', port, baudRate: 57600, autoConnect: false })
+        this.device.on('data', this.onReceive.bind(this))
+        this.device.connect()
         this.state = 'stopped'
     }
     backward() {
-        this.send('B')
+        this.device.send('B')
     }
     forward() {
-        this.send('F')
+        this.device.send('F')
     }
-    receive(data) {
+    onReceive(data) {
         // Set our state when the motor updates its state
         this.state = data
     }
     stop() {
-        this.send('S')
+        this.device.send('S')
     }
 }
 ```
@@ -69,13 +71,16 @@ Another example would be a power controller that sends a number representing whi
 (File `power_control.js`)
 
 ```javascript
+const EventEmitter = require('events')
 const SerialDevice = require('@ami/serial').Device
 
-class PowerControl extends SerialDevice {
+class PowerControl extends EventEmitter {
     constructor(port) {
-        super({ name: 'powerControls', port })
+        super()
+        this.device = new SerialDevice({ name: 'powerControls', port })
+        this.device.on('data', this.onReceive.bind(this))
     }
-    receive(data) {
+    onReceive(data) {
         let buttons = {0: 'power', 1: 'standby', 2: 'aux'}
         this.emit(buttons[data])
     }
@@ -98,8 +103,8 @@ PowerControls.on('aux', () => {
 })
 ```
 
-API Documentation
------------------
+API Methods
+-----------
 
 ### `new Device({ name, port, baudRate?, reconnectInterval?, autoConnect?, parser? })`
 
@@ -116,13 +121,7 @@ Constructor
 
 Connect to Serial device described in constructors args. The returned promise will resolve once connected.
 
-### `Device.receive(data)`
-
-Override in child classes. Automatically called when serial data is received for this device. If no `parser` is specified, this will be called once per line.
-
-  * `data`: Incoming string
-
-### `Device.send(data)` : `Boolean`
+### `Device.send(data)` : `<Promise<Boolean>>`
 
 Send serial data to device. Returns `false` if the send buffer is full, otherwise `true`.
 
@@ -131,6 +130,19 @@ Send serial data to device. Returns `false` if the send buffer is full, otherwis
 ### `Device.close()` : `<Promise>`
 
 Close connection to device. The returned promise will resolve on completion.
+
+API Events
+----------
+
+### `connect`
+
+Emitted when a successful connection has been made.
+
+### `data`
+
+Emitted when serial data is received for this device. If no `parser` is specified, this will be called once per line.
+
+  * `data`: Incoming buffer
 
 Development & Tests
 -------------------

@@ -66,18 +66,18 @@ describe('Input/Output', () => {
     beforeEach(() => {
         device = new Device({ name: 'fakeDevice', port: '/dev/ttyS0fake', autoConnect: false })
     })
-    afterEach(() => {
-        device.close()
-    })
+    afterEach(() => device.close())
     it('should receive data', async() => {
-        let receiveFunc = jest.spyOn(device, 'receive')
+        let receiveFunc = jest.fn()
+        device.on('data', receiveFunc)
         await device.connect()
         device.serial.binding.emitData(Buffer.from('a message\nsecond'))
         await delay(30)
         expect(receiveFunc).toHaveBeenCalledWith('a message')
     })
     it('should not receive data twice after a reconnection', async() => {
-        let receiveFunc = jest.spyOn(device, 'receive')
+        let receiveFunc = jest.fn()
+        device.on('data', receiveFunc)
         await device.connect()
         await device.close()
         await device.connect()
@@ -88,18 +88,16 @@ describe('Input/Output', () => {
     it('should send data', async() => {
         await device.connect()
         let writeFunc = jest.spyOn(device.serial, 'write')
-        device.send('outbound!')
-        await delay(5)
+        await device.send('outbound!')
         expect(writeFunc).toHaveBeenCalledWith('outbound!', expect.any(Function))
     })
     it('should inform user if data could not be sent', async() => {
         let error = jest.spyOn(console, 'error')
         await device.connect()
         let writeFunc = jest.spyOn(device.serial, 'write')
-        device.send('this send should fail')
+        const response = device.send('this send should fail')
         device.close()
-        await delay(5)
-        expect(error).toHaveBeenCalledWith(expect.stringMatching(/Error sending/))
+        await expect(response).rejects.toEqual(expect.stringMatching(/Error sending/))
     })
 })
 
