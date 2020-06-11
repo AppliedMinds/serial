@@ -7,6 +7,7 @@
     "registry": "http://npm:4873"
   },
   "scripts": {
+    "lint": "eslint --ext .js .",
     "test": "jest"
   },
   "jest": {
@@ -18,20 +19,20 @@
     "silent": true
   },
   "dependencies": {
-    "serialport": "^8.0.7"
+    "serialport": "^9.0.0"
   },
   "repository": {
     "type": "git",
     "url": "https://am-gitlab.amthinking.net/software-engineering-tools/js/ami-serial"
   },
   "devDependencies": {
-    "@babel/core": "^7.9.6",
-    "@babel/plugin-proposal-throw-expressions": "^7.8.3",
-    "@babel/preset-env": "^7.9.6",
-    "babel-jest": "^25.5.1",
-    "eslint": "^6.8.0",
-    "eslint-plugin-jest": "^23.8.2",
-    "jest": "^25.5.3"
+    "@babel/core": "^7.10.2",
+    "@babel/plugin-proposal-throw-expressions": "^7.10.1",
+    "@babel/preset-env": "^7.10.2",
+    "babel-jest": "^26.0.1",
+    "eslint": "^7.2.0",
+    "eslint-plugin-jest": "^23.13.2",
+    "jest": "^26.0.1"
   },
   "author": "Ivo Janssen <ijanssen@appliedminds.com>",
   "license": "UNLICENSED",
@@ -53,6 +54,11 @@
       "jest"
     ],
     "rules": {
+      "camelcase": "error",
+      "eqeqeq": [
+        "warn",
+        "always"
+      ],
       "indent": [
         "error",
         4
@@ -60,10 +66,6 @@
       "linebreak-style": [
         "error",
         "unix"
-      ],
-      "quotes": [
-        "error",
-        "single"
       ],
       "no-console": [
         "error",
@@ -74,6 +76,15 @@
             "error"
           ]
         }
+      ],
+      "object-curly-spacing": [
+        "warn",
+        "always"
+      ],
+      "prefer-const": "warn",
+      "quotes": [
+        "error",
+        "single"
       ],
       "semi": [
         "error",
