@@ -16,7 +16,7 @@ describe('Connection Handling', () => {
         jest.clearAllMocks()
     })
     it('should automatically connect on instantiation', async() => {
-        let connectFunc = jest.spyOn(Device.prototype, 'connect')
+        const connectFunc = jest.spyOn(Device.prototype, 'connect')
         const device = new Device({ name: 'fakeDevice', port: '/dev/ttyS0fake' })
         await delay(30)
         expect(connectFunc).toHaveBeenCalled()
@@ -29,8 +29,8 @@ describe('Connection Handling', () => {
         device.close()
     })
     it('should reconnect on abnormal close', async() => {
-        let device = new Device({ name: 'fakeDevice', port: '/dev/ttyS0fake', autoConnect: false })
-        let initFunc = jest.spyOn(device, 'init')
+        const device = new Device({ name: 'fakeDevice', port: '/dev/ttyS0fake', autoConnect: false })
+        const initFunc = jest.spyOn(device, 'init')
         // 30 ms reconnect
         device.reconnectInterval = .03
         await device.connect()
@@ -42,8 +42,8 @@ describe('Connection Handling', () => {
     })
     it('should reconnect if connection failed', async() => {
         //jest.resetAllMocks() 
-        let connectFunc = jest.spyOn(Device.prototype, 'connect')
-        let device = new Device({ name: 'fakeDevice', port: '/dev/ttyNonExistent' })
+        const connectFunc = jest.spyOn(Device.prototype, 'connect')
+        const device = new Device({ name: 'fakeDevice', port: '/dev/ttyNonExistent' })
         // 30 ms reconnect
         device.reconnectInterval = .03
         await delay(60)
@@ -51,9 +51,8 @@ describe('Connection Handling', () => {
         device.close()
     })
     it('should emit a connect event when connected', async() => {
-        let device = new Device({ name: 'fakeDevice', port: '/dev/ttyS0fake' })
-        const someFunc = () => {}
-        let runMe = jest.fn()
+        const device = new Device({ name: 'fakeDevice', port: '/dev/ttyS0fake' })
+        const runMe = jest.fn()
         device.on('connect', runMe)
         await delay(10)
         expect(runMe).toHaveBeenCalled()
@@ -68,7 +67,7 @@ describe('Input/Output', () => {
     })
     afterEach(() => device.close())
     it('should receive data', async() => {
-        let receiveFunc = jest.fn()
+        const receiveFunc = jest.fn()
         device.on('data', receiveFunc)
         await device.connect()
         device.serial.binding.emitData(Buffer.from('a message\nsecond'))
@@ -76,7 +75,7 @@ describe('Input/Output', () => {
         expect(receiveFunc).toHaveBeenCalledWith('a message')
     })
     it('should not receive data twice after a reconnection', async() => {
-        let receiveFunc = jest.fn()
+        const receiveFunc = jest.fn()
         device.on('data', receiveFunc)
         await device.connect()
         await device.close()
@@ -87,14 +86,12 @@ describe('Input/Output', () => {
     })
     it('should send data', async() => {
         await device.connect()
-        let writeFunc = jest.spyOn(device.serial, 'write')
+        const writeFunc = jest.spyOn(device.serial, 'write')
         await device.send('outbound!')
         expect(writeFunc).toHaveBeenCalledWith('outbound!', expect.any(Function))
     })
     it('should inform user if data could not be sent', async() => {
-        let error = jest.spyOn(console, 'error')
         await device.connect()
-        let writeFunc = jest.spyOn(device.serial, 'write')
         const response = device.send('this send should fail')
         device.close()
         await expect(response).rejects.toEqual(expect.stringMatching(/Error sending/))
@@ -108,8 +105,8 @@ describe('Parsing', () => {
             on: () => {},
             once: () => {}
         }
-        let device = new Device({ name: 'fakeDevice', port: '/dev/ttyS0fake', parser: FakeParser, autoConnect: false })
-        let pipeFunc = jest.spyOn(TestSerialPort.prototype, 'pipe')
+        const device = new Device({ name: 'fakeDevice', port: '/dev/ttyS0fake', parser: FakeParser, autoConnect: false })
+        const pipeFunc = jest.spyOn(TestSerialPort.prototype, 'pipe')
         await device.connect()
         expect(pipeFunc).toHaveBeenCalledWith(FakeParser)
     })

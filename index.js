@@ -14,7 +14,7 @@ class Device extends EventEmitter {
         if (autoConnect) this.connect()
     }
     connect() {
-        return new Promise((res, rej) => {
+        return new Promise(res => {
             this.serial = new SerialPort(this.port, { baudRate: this.baudRate })
             this.serial.on('close', this.closed.bind(this))
             this.serial.on('error', this.error.bind(this))
