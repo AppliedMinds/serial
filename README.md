@@ -138,6 +138,10 @@ API Events
 
 Emitted when a successful connection has been made.
 
+### `close`
+
+Emitted when a connection is closed, either expectedly or unexpectedly
+
 ### `data`
 
 Emitted when serial data is received for this device. If no `parser` is specified, this will be called once per line.

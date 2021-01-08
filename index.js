@@ -47,6 +47,7 @@ class Device extends EventEmitter {
             console.warn(`${this.name} at ${this.port} disconnected. Attemping reconnect in ${this.reconnectInterval} seconds...`)
             this._reconnectTimer = setTimeout(this.connect.bind(this), this.reconnectInterval * 1000)
         }
+        this.emit('close')
     }
     async send(data) {
         return new Promise((res, rej) => {

@@ -58,6 +58,26 @@ describe('Connection Handling', () => {
         expect(runMe).toHaveBeenCalled()
         device.close()
     })
+    it('should emit a close event on regular disconnect', async() => {
+        const device = new Device({ name: 'fakeDevice', port: '/dev/ttyS0fake' })
+        const runMe = jest.fn()
+        device.on('close', runMe)
+        await delay(10)
+        await device.close()
+        expect(runMe).toHaveBeenCalled()
+    })
+    it('should emit a close event on abnormal disconnect', async() => {
+        const device = new Device({ name: 'fakeDevice', port: '/dev/ttyS0fake' })
+        const runMe = jest.fn()
+        device.on('close', runMe)
+        await delay(10)
+        // Simulate disconnect
+        device.serial._disconnected({})
+        // Wait slightly to let events propagate
+        await delay(10)
+        expect(runMe).toHaveBeenCalled()
+        device.close()
+    })
 })
 
 describe('Input/Output', () => {
