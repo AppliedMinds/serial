@@ -27,11 +27,11 @@ class Device extends EventEmitter {
     init() {
         this._dataStream = this.serial.pipe(this.parser)
         this._dataStream.on('data', this.emit.bind(this, 'data'))
-        console.info(`Connected to device ${this.name} at ${this.port}.`)
+        console.info(`[${this.name}] Connected at ${this.port}.`)
         this.emit('connect')
     }
     error(error) {
-        console.error(`Problem with ${this.name}: ${error}. Attemping reconnect in ${this.reconnectInterval} seconds...`)
+        console.error(`[${this.name}] ${error.message}. Attemping reconnect in ${this.reconnectInterval} seconds...`)
         clearTimeout(this._reconnectTimer)
         this._reconnectTimer = setTimeout(this.connect.bind(this), this.reconnectInterval * 1000)
     }
@@ -44,7 +44,7 @@ class Device extends EventEmitter {
         clearTimeout(this._reconnectTimer)
         this._dataStream.removeAllListeners()
         if (error && error.disconnected) {
-            console.warn(`${this.name} at ${this.port} disconnected. Attemping reconnect in ${this.reconnectInterval} seconds...`)
+            console.warn(`[${this.name}] Disconnected at ${this.port}. Attemping reconnect in ${this.reconnectInterval} seconds...`)
             this._reconnectTimer = setTimeout(this.connect.bind(this), this.reconnectInterval * 1000)
         }
         this.emit('close')
