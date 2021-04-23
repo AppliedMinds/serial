@@ -1,6 +1,6 @@
 {
   "name": "@ami/serial",
-  "version": "2.2.1",
+  "version": "2.2.2",
   "description": "AMI Serial Wrapper",
   "main": "index.js",
   "publishConfig": {
