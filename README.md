@@ -1,36 +1,33 @@
-AMI Serial Device
-=================
+Serial
+======
 
-Easily integrate with serial-based hardware with Node.js.
+![tests](https://github.com/appliedminds/serial/workflows/CI/badge.svg?branch=master)
 
-Features:
+Convenience wrapper on top of [`serialport`](https://www.npmjs.com/package/serialport) for Node.js, providing the following features:
 
- * Easy event management
  * Automatic connection healing
- * Automatic line parsing of incoming messages
+ * Connection naming
+ * Easy event management
+ * Asynchronous send methods
+
+##### Contents
+
+- [Requirements](#requirements)
+- [Installation](#installation)
+- [Examples](#usage-examples)
+- [API Docs](#api-docs)
+- [License](#license)
 
 Requirements
 ------------
 
-### Node.js 12+
-
- * MacOS: `brew install node` using [Homebrew](http://brew.sh/)
- * Linux: `apt install nodejs` ([see Ubuntu/Debian specific instructions](https://nodejs.org/en/download/package-manager/#debian-and-ubuntu-based-linux-distributions)) or `pacman -S nodejs` (Arch Linux)
- * Windows: [Install](https://nodejs.org/en/download/)
+ * Node 12+
 
 Installation
 ------------
 
-Ensure the local AMI registry is being used:
-
 ```shell
-npm set -g @ami:registry http://npm:4873
-```
-
-Then simply install:
-
-```shell
-npm install @ami/serial
+npm install @appliedminds/serial
 ```
 
 Usage / Examples
@@ -41,7 +38,7 @@ Create a new `Device` for any piece of hardware that uses serial to communicate.
 For example, imagine a motor board that uses `F`, `B` or `S` to send forward, back or stop commands, respectively:
 
 ```javascript
-const SerialDevice = require('@ami/serial').Device
+import { Device as SerialDevice } from '@appliedminds/serial'
 
 class Motor {
     constructor(port) {
@@ -57,22 +54,24 @@ class Motor {
         this.device.send('F')
     }
     onReceive(data) {
-        // Set our state when the motor updates its state
+        // Cache state when the device relays its state
         this.state = data
     }
     stop() {
         this.device.send('S')
     }
 }
+
+const myMotor = new Motor('COM3')
+myMotor.forward()
 ```
 
 Another example would be a power controller that sends a number representing which button has been pressed:
 
-(File `power_control.js`)
 
 ```javascript
-const EventEmitter = require('events')
-const SerialDevice = require('@ami/serial').Device
+import EventEmitter from 'events'
+import SerialDevice from '@appliedminds/serial'
 
 class PowerControl extends EventEmitter {
     constructor(port) {
@@ -86,27 +85,21 @@ class PowerControl extends EventEmitter {
     }
 }
 
-module.exports = PowerControl
-```
+const powerControls = new PowerControls('/dev/cu.usbmodem1337')
 
-(File `index.js`)
-
-```javascript
-const PowerControls = require('./power_control.js')
-
-PowerControls.on('power', () => {
+powerControls.on('power', () => {
     console.log('Power button pressed')
 })
 
-PowerControls.on('aux', () => {
+powerControls.on('aux', () => {
     console.log('Aux button pressed')
 })
 ```
 
-API Methods
------------
+API Docs
+--------
 
-### `new Device({ name, port, baudRate?, reconnectInterval?, autoConnect?, parser? })`
+### `new Device({ name : String, port : String, baudRate? : Number, reconnectInterval? : Number, autoConnect? : Boolean, parser? : Transform })`
 
 Constructor
 
@@ -115,42 +108,41 @@ Constructor
   * `baudRate`: Baud rate used for communication (default: `115200`)
   * `reconnectInterval`: Seconds until reconnect attempt after disconnect or error (default: `3`)
   * `autoConnect`: Automatically connect on instantiation (default `true`). If you set this to `false`, you'll need to manually call `connect()` at a later time.
-  * `parser`: Which parser to use for incoming data (defaults to [`@serialport/parser-readline`, a parser that splits on newlines](https://serialport.io/docs/api-parser-readline))
+  * `parser`: Which parser to use for incoming data (defaults to [`@serialport/parser-readline`, a parser that splits on newlines](https://serialport.io/docs/api-parser-readline)). Other parsers can be found at [@serialport](https://serialport.io/docs/#parsers), or you can write your own [Stream.Transform](https://nodejs.org/api/stream.html#stream_class_stream_transform).
 
-### `Device.connect()` : `<Promise>`
-
-Connect to Serial device described in constructors args. The returned promise will resolve once connected.
-
-### `Device.send(data)` : `<Promise<Boolean>>`
-
-Send serial data to device. Returns `false` if the send buffer is full, otherwise `true`.
-
-  * `data`: Outgoing string
-
-### `Device.close()` : `<Promise>`
-
-Close connection to device. The returned promise will resolve on completion.
-
-API Events
-----------
-
-### `connect`
-
-Emitted when a successful connection has been made.
-
-### `close`
+### Event: `'close'`
 
 Emitted when a connection is closed, either expectedly or unexpectedly
 
-### `data`
+### Event: `'connect'`
 
-Emitted when serial data is received for this device. If no `parser` is specified, this will be called once per line.
+Emitted when a successful connection has been made.
 
-  * `data`: Incoming buffer
+### Event: '`data`'
 
-Development & Tests
--------------------
+Emitted with a `Buffer` when data is received for this device. If no `parser` is specified, this will be called once per line.
 
-1. Clone repo: `git clone <repo_url>`
-2. Install dependencies: `npm install`
-3. Run test suite: `npm test`
+### `device.close()` : `<Promise>`
+
+Manually close connection. Resolves once the connection has been closed.
+
+### `device.connect()` : `<Promise>`
+
+Connect to device. The returned promise will resolve once connected.
+
+### `device.send(data : Buffer/String)` : `<Promise>`
+
+Send serial data to device. Resolves once data is sent.
+
+  * `data`: Outgoing Buffer or string
+
+Contributing & Tests
+--------------------
+
+1. Install development dependencies: `npm install`
+2. Run test suite: `npm test`
+
+License
+-------
+
+MIT
