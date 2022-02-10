@@ -8,8 +8,7 @@ const { Device } = require('.')
 
 const portOne = '/dev/ttyS0fake'
 MockBinding.createPort(portOne, { echo: false, record: true })
-const delay = (ms) => new Promise((res) => setTimeout(res, ms))
-
+const delay = ms => new Promise(res => setTimeout(res, ms))
 
 describe('Connection Handling', () => {
     afterEach(() => {
@@ -24,7 +23,9 @@ describe('Connection Handling', () => {
     })
     it('should allow manual connection if desired', () => {
         let device
-        const start = () => { device = new Device({ name: 'fakeDevice', autoConnect: false }) }
+        const start = () => {
+            device = new Device({ name: 'fakeDevice', autoConnect: false })
+        }
         expect(start).not.toThrow(Error)
         device.close()
     })
@@ -32,7 +33,7 @@ describe('Connection Handling', () => {
         const device = new Device({ name: 'fakeDevice', port: '/dev/ttyS0fake', autoConnect: false })
         const initFunc = jest.spyOn(device, 'init')
         // 30 ms reconnect
-        device.reconnectInterval = .03
+        device.reconnectInterval = 0.03
         await device.connect()
         // Simulate disconnect
         device.serial._disconnected({})
@@ -41,11 +42,10 @@ describe('Connection Handling', () => {
         device.close()
     })
     it('should reconnect if connection failed', async() => {
-        //jest.resetAllMocks() 
         const connectFunc = jest.spyOn(Device.prototype, 'connect')
         const device = new Device({ name: 'fakeDevice', port: '/dev/ttyNonExistent' })
         // 30 ms reconnect
-        device.reconnectInterval = .03
+        device.reconnectInterval = 0.03
         await delay(60)
         expect(connectFunc).toHaveBeenCalledTimes(2)
         device.close()

@@ -3,7 +3,7 @@ const SerialPort = require('serialport')
 const ReadLine = require('@serialport/parser-readline')
 
 class Device extends EventEmitter {
-    constructor({ name, port, baudRate=115200, reconnectInterval=3, autoConnect=true, parser=null }) {
+    constructor({ name, port, baudRate = 115200, reconnectInterval = 3, autoConnect = true, parser = null }) {
         super()
         this.name = name
         this.port = port
