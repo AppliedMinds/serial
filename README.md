@@ -14,7 +14,7 @@ Convenience wrapper on top of [`serialport`](https://www.npmjs.com/package/seria
 
 - [Requirements](#requirements)
 - [Installation](#installation)
-- [Examples](#usage-examples)
+- [Examples](#usage--examples)
 - [API Docs](#api-docs)
 - [License](#license)
 
