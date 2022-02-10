@@ -19,6 +19,9 @@
     "verbose": true,
     "silent": true
   },
+  "files": [
+    "index.js"
+  ],
   "dependencies": {
     "serialport": "^9.2.8"
   },
