@@ -4,7 +4,7 @@ const MockBinding = TestSerialPort.Binding
 jest.mock('serialport')
 SerialPort.mockImplementation(TestSerialPort)
 
-const { Device } = require('.')
+const { Device } = require('..')
 
 const portOne = '/dev/ttyS0fake'
 MockBinding.createPort(portOne, { echo: false, record: true })
