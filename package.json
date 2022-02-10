@@ -1,13 +1,14 @@
 {
-  "name": "@ami/serial",
+  "name": "@appliedminds/serial",
   "version": "2.2.2",
-  "description": "AMI Serial Wrapper",
+  "description": "Service wrapper to easily integrate serial devices",
   "main": "index.js",
-  "publishConfig": {
-    "registry": "http://npm:4873"
+  "module": "index.js",
+  "engines": {
+    "node": ">=12.20"
   },
   "scripts": {
-    "lint": "eslint --ext .js .",
+    "lint": "eslint *.js",
     "test": "jest"
   },
   "jest": {
@@ -23,73 +24,34 @@
   },
   "repository": {
     "type": "git",
-    "url": "https://am-gitlab.amthinking.net/software-engineering-tools/js/ami-serial"
+    "url": "https://github.com/appliedminds/serial"
   },
+  "bugs": {
+    "url": "https://github.com/appliedminds/serial/issues"
+  },
+  "homepage": "https://github.com/appliedminds/serial",
   "devDependencies": {
+    "@appliedminds/eslint-config": "^1.1.0",
     "@babel/core": "^7.17.2",
-    "@babel/plugin-proposal-throw-expressions": "^7.16.7",
     "@babel/preset-env": "^7.16.11",
     "babel-jest": "^27.5.1",
     "eslint": "^8.8.0",
     "eslint-plugin-jest": "^26.1.0",
     "jest": "^27.5.1"
   },
-  "author": "Ivo Janssen <ijanssen@appliedminds.com>",
-  "license": "UNLICENSED",
+  "author": "Ivo Janssen <ivo@appliedminds.com>",
+  "license": "MIT",
   "eslintConfig": {
-    "env": {
-      "es6": true,
-      "jest/globals": true,
-      "node": true
-    },
-    "parserOptions": {
-      "ecmaVersion": 2020,
-      "sourceType": "module"
-    },
     "extends": [
-      "eslint:recommended",
+      "@appliedminds",
       "plugin:jest/recommended"
-    ],
-    "plugins": [
-      "jest"
-    ],
-    "rules": {
-      "camelcase": "error",
-      "eqeqeq": [
-        "warn",
-        "always"
-      ],
-      "indent": [
-        "error",
-        4
-      ],
-      "linebreak-style": [
-        "error",
-        "unix"
-      ],
-      "no-console": [
-        "error",
-        {
-          "allow": [
-            "warn",
-            "info",
-            "error"
-          ]
-        }
-      ],
-      "object-curly-spacing": [
-        "warn",
-        "always"
-      ],
-      "prefer-const": "warn",
-      "quotes": [
-        "error",
-        "single"
-      ],
-      "semi": [
-        "error",
-        "never"
-      ]
-    }
-  }
+    ]
+  },
+  "keywords": [
+    "serial",
+    "serial port",
+    "communication",
+    "ami",
+    "appliedminds"
+  ]
 }
