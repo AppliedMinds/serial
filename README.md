@@ -21,7 +21,7 @@ Convenience wrapper on top of [`serialport`](https://www.npmjs.com/package/seria
 Requirements
 ------------
 
- * Node 12+
+ * Node 14+
 
 Installation
 ------------
