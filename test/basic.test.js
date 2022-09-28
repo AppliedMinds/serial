@@ -1,8 +1,12 @@
-const SerialPort = require('serialport')
-const TestSerialPort = require('serialport/test')
-const MockBinding = TestSerialPort.Binding
-jest.mock('serialport')
-SerialPort.mockImplementation(TestSerialPort)
+const { SerialPort } = require('serialport')
+const { MockBinding } = require('@serialport/binding-mock')
+jest.mock('serialport', () => {
+    const originalModule = jest.requireActual('serialport')
+    return {
+        ...originalModule,
+        SerialPort: originalModule.SerialPortMock
+    }
+})
 
 const { Device } = require('..')
 
@@ -90,7 +94,7 @@ describe('Input/Output', () => {
         const receiveFunc = jest.fn()
         device.on('data', receiveFunc)
         await device.connect()
-        device.serial.binding.emitData(Buffer.from('a message\nsecond'))
+        device.serial.port.emitData(Buffer.from('a message\nsecond'))
         await delay(30)
         expect(receiveFunc).toHaveBeenCalledWith('a message')
     })
@@ -100,7 +104,7 @@ describe('Input/Output', () => {
         await device.connect()
         await device.close()
         await device.connect()
-        device.serial.binding.emitData(Buffer.from('another\n'))
+        device.serial.port.emitData(Buffer.from('another\n'))
         await delay(30)
         expect(receiveFunc).toHaveBeenCalledTimes(1)
     })
@@ -126,7 +130,7 @@ describe('Parsing', () => {
             once: () => {}
         }
         const device = new Device({ name: 'fakeDevice', port: '/dev/ttyS0fake', parser: FakeParser, autoConnect: false })
-        const pipeFunc = jest.spyOn(TestSerialPort.prototype, 'pipe')
+        const pipeFunc = jest.spyOn(SerialPort.prototype, 'pipe')
         await device.connect()
         expect(pipeFunc).toHaveBeenCalledWith(FakeParser)
     })

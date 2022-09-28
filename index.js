@@ -1,6 +1,6 @@
 const EventEmitter = require('events')
-const SerialPort = require('serialport')
-const ReadLine = require('@serialport/parser-readline')
+const { SerialPort } = require('serialport')
+const { ReadlineParser } = require('@serialport/parser-readline')
 
 class Device extends EventEmitter {
     constructor({ name, port, baudRate = 115200, reconnectInterval = 3, autoConnect = true, parser = null }) {
@@ -8,14 +8,14 @@ class Device extends EventEmitter {
         this.name = name
         this.port = port
         this.baudRate = baudRate
-        this.parser = parser ? parser : new ReadLine()
+        this.parser = parser ? parser : new ReadlineParser()
         // Seconds to reconnect
         this.reconnectInterval = reconnectInterval
         if (autoConnect) this.connect()
     }
     connect() {
         return new Promise(res => {
-            this.serial = new SerialPort(this.port, { baudRate: this.baudRate })
+            this.serial = new SerialPort({ baudRate: this.baudRate, path: this.port })
             this.serial.on('close', this.closed.bind(this))
             this.serial.on('error', this.error.bind(this))
             this.serial.on('open', () => {
