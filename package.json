@@ -1,6 +1,6 @@
 {
   "name": "@appliedminds/serial",
-  "version": "3.0.2",
+  "version": "4.0.0",
   "description": "Service wrapper to easily integrate serial devices",
   "main": "index.js",
   "type": "module",
