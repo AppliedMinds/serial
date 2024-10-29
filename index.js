@@ -1,8 +1,8 @@
-const EventEmitter = require('events')
-const { SerialPort } = require('serialport')
-const { ReadlineParser } = require('@serialport/parser-readline')
+import { EventEmitter } from 'node:events'
+import { SerialPort } from 'serialport'
+import { ReadlineParser } from '@serialport/parser-readline'
 
-class Device extends EventEmitter {
+export class Device extends EventEmitter {
     constructor({ name, port, baudRate = 115200, reconnectInterval = 3, autoConnect = true, parser = null }) {
         super()
         this.name = name
@@ -49,7 +49,7 @@ class Device extends EventEmitter {
         }
         this.emit('close')
     }
-    async send(data) {
+    send(data) {
         return new Promise((res, rej) => {
             this.serial.write(data, err => {
                 if (err) {
@@ -60,5 +60,3 @@ class Device extends EventEmitter {
         })
     }
 }
-
-module.exports = { Device }

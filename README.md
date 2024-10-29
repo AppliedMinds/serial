@@ -1,7 +1,7 @@
 Serial
 ======
 
-![tests](https://github.com/appliedminds/serial/workflows/CI/badge.svg?branch=master)
+![tests](https://github.com/appliedminds/serial/actions/workflows/main.yml/badge.svg)
 
 Convenience wrapper on top of [`serialport`](https://www.npmjs.com/package/serialport) for Node.js, providing the following features:
 
@@ -21,7 +21,7 @@ Convenience wrapper on top of [`serialport`](https://www.npmjs.com/package/seria
 Requirements
 ------------
 
- * Node 18+
+ * Node 20+
 
 Installation
 ------------
@@ -70,7 +70,7 @@ Another example would be a power controller that sends a number representing whi
 
 
 ```javascript
-import EventEmitter from 'events'
+import EventEmitter from 'node:events'
 import SerialDevice from '@appliedminds/serial'
 
 class PowerControl extends EventEmitter {
@@ -112,7 +112,7 @@ Constructor
 
 ### Event: `'close'`
 
-Emitted when a connection is closed, either expectedly or unexpectedly
+Emitted when a connection is closed, either expected or unexpectedly
 
 ### Event: `'connect'`
 

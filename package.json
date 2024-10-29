@@ -3,20 +3,13 @@
   "version": "3.0.2",
   "description": "Service wrapper to easily integrate serial devices",
   "main": "index.js",
-  "module": "index.js",
+  "type": "module",
   "engines": {
     "node": ">=18"
   },
   "scripts": {
-    "lint": "eslint *.js",
-    "test": "jest"
-  },
-  "jest": {
-    "collectCoverage": true,
-    "coverageReporters": [
-      "text"
-    ],
-    "verbose": true
+    "lint": "eslint",
+    "test": "node --test --experimental-test-module-mocks --experimental-test-coverage test/*.test.js"
   },
   "files": [
     "index.js"
@@ -33,22 +26,11 @@
   },
   "homepage": "https://github.com/appliedminds/serial",
   "devDependencies": {
-    "@appliedminds/eslint-config": "^1.6.0",
-    "@babel/core": "^7.23.7",
-    "@babel/preset-env": "^7.23.8",
-    "babel-jest": "^29.7.0",
-    "eslint": "^8.56.0",
-    "eslint-plugin-jest": "^27.6.2",
-    "jest": "^29.7.0"
+    "@appliedminds/eslint-config": "^2.0.2",
+    "eslint": "^9.13.0"
   },
   "author": "Ivo Janssen <ivo@appliedminds.com>",
   "license": "MIT",
-  "eslintConfig": {
-    "extends": [
-      "@appliedminds",
-      "plugin:jest/recommended"
-    ]
-  },
   "keywords": [
     "serial",
     "serial port",
