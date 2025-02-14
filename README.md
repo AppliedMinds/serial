@@ -108,7 +108,7 @@ Constructor
   * `baudRate`: Baud rate used for communication (default: `115200`)
   * `reconnectInterval`: Seconds until reconnect attempt after disconnect or error (default: `3`)
   * `autoConnect`: Automatically connect on instantiation (default `true`). If you set this to `false`, you'll need to manually call `connect()` at a later time.
-  * `parser`: Which parser to use for incoming data (defaults to [`@serialport/parser-readline`, a parser that splits on newlines](https://serialport.io/docs/api-parser-readline)). Other parsers can be found at [@serialport](https://serialport.io/docs/#parsers), or you can write your own [Stream.Transform](https://nodejs.org/api/stream.html#stream_class_stream_transform).
+  * `parser`: Which parser to use for incoming data (defaults to [`@serialport/parser-readline`, a parser that splits on newlines](https://serialport.io/docs/api-parser-readline)). Other parsers can be found at [@serialport](https://serialport.io/docs/#parsers), or you can write your own [Stream.Transform](https://nodejs.org/api/stream.html#stream_class_stream_transform). Set to `null` to skip parsing altogether and output raw `Buffer`s.
 
 ### Event: `'close'`
 

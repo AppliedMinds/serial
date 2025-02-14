@@ -1,5 +1,6 @@
 import { afterEach, beforeEach, describe, it, mock } from 'node:test'
 import assert from 'node:assert/strict'
+import { Transform } from 'node:stream'
 import { setTimeout as delay } from 'node:timers/promises'
 import { SerialPortMock } from 'serialport'
 
@@ -120,14 +121,23 @@ describe('Input/Output', () => {
 
 describe('Parsing', () => {
     it('should allow passing of custom parsers', async() => {
-        const FakeParser = {
-            emit: () => {},
-            on: () => {},
-            once: () => {}
-        }
-        const device = new Device({ name: 'fakeDevice', port: '/dev/ttyS0fake', parser: FakeParser, autoConnect: false })
+        class FakeParser extends Transform {}
+        const parser = new FakeParser()
+        const device = new Device({ name: 'fakeDevice', port: '/dev/ttyS0fake', parser, autoConnect: false })
         const pipeFunc = mock.method(SerialPortMock.prototype, 'pipe')
         await device.connect()
-        assert.equal(pipeFunc.mock.calls[0].arguments[0], FakeParser)
+        assert.equal(pipeFunc.mock.calls[0].arguments[0], parser)
+        await device.close()
+    })
+    it('should allow skipping of parsing', async() => {
+        const device = new Device({ name: 'fakeDevice', port: '/dev/ttyS0fake', parser: null, autoConnect: false })
+        const receiveFunc = mock.fn()
+        device.on('data', receiveFunc)
+        await device.connect()
+        device.serial.port.emitData(Buffer.from('a message\nsecond'))
+        await delay(30)
+        // Should *not* be split by new lines
+        assert.deepEqual(receiveFunc.mock.calls[0].arguments[0], Buffer.from('a message\nsecond'))
+        await device.close()
     })
 })

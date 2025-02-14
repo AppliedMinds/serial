@@ -3,12 +3,12 @@ import { SerialPort } from 'serialport'
 import { ReadlineParser } from '@serialport/parser-readline'
 
 export class Device extends EventEmitter {
-    constructor({ name, port, baudRate = 115200, reconnectInterval = 3, autoConnect = true, parser = null }) {
+    constructor({ name, port, baudRate = 115200, reconnectInterval = 3, autoConnect = true, parser = new ReadlineParser() }) {
         super()
         this.name = name
         this.port = port
         this.baudRate = baudRate
-        this.parser = parser ? parser : new ReadlineParser()
+        this.parser = parser
         // Seconds to reconnect
         this.reconnectInterval = reconnectInterval
         if (autoConnect) this.connect()
@@ -25,7 +25,7 @@ export class Device extends EventEmitter {
         })
     }
     init() {
-        this._dataStream = this.serial.pipe(this.parser)
+        this._dataStream = this.parser ? this.serial.pipe(this.parser) : this.serial
         this._dataStream.on('data', this.emit.bind(this, 'data'))
         console.info(`[${this.name}] Connected at ${this.port}.`)
         this.emit('connect')
